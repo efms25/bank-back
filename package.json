@@ -9,7 +9,11 @@
     "build:raw": "tsc",
     "start": "node build/index.js",
     "test": "jest",
-    "tsInit": "npx tsc --init"
+    "tsInit": "npx tsc --init",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:create": "npm run typeorm migration:create -n ",
+    "migration:run": "npx typeorm-ts-node-commonjs migration:run -d src/database/index.ts",
+    "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d src/database/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +27,9 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.20"
   }
 }
