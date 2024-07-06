@@ -1,32 +1,31 @@
-import { UserService, User } from "./UserService"
+import { UserService } from "./UserService"
+
+jest.mock('../repositories/UserRepository')
+jest.mock('../database', () => {
+    initialize: jest.fn()
+})
+
+const mockUserRepository = require('../repositories/UserRepository')
 
 describe("UserService", () => {
-    const mockDb: User[] = [];
+    const userService = new UserService(mockUserRepository)
 
-    const userService = new UserService(mockDb);
-
-    it('Deve adicionar um novo usuário', () => {
-        const mockConsole = jest.spyOn(global.console, 'log')
-        userService.createUser("Jorge", "Jorge@mail.com");
-        expect(mockConsole).toHaveBeenCalledWith(mockDb, "--DB atualizado")
+    it('Deve adicionar um novo usuário', async () => {
+        mockUserRepository.createUser = jest.fn().mockImplementation(() => Promise.resolve({
+            id_user: '123345',
+            name: 'kodah',
+            email: 'kodah@mail.com',
+            password: '123456'
+        }));
+        const response = await userService.createUser('kodah', 'kodah@mail.com', '123456');
+        expect(mockUserRepository.createUser).toHaveBeenCalled();
+        expect(response).toMatchObject({
+            id_user: '123345',
+            name: 'kodah',
+            email: 'kodah@mail.com',
+            password: '123456'
+        })
     })
 
-    it('Deve retornar um erro por causa da falta de campos obrigatórios', () => {
-        const mockConsole = jest.spyOn(global.console, 'log')
-        userService.createUser("", "");
-        expect(mockConsole).toHaveBeenCalledWith("Nome e email são obrigatórios")
-    })
 
-    it('Deve retornar os usuário do DB', () => {
-        const returnedDb = userService.getAllUsers();
-        console.log(returnedDb, 'db returned')
-        expect(returnedDb).toMatchObject(mockDb)
-    })
-
-    it("Deve remover item do DB", () => {
-        const mockConsole = jest.spyOn(global.console, 'log')
-        const mockEmail = "Jorge@mail.com"
-        userService.deleteUser(mockEmail);
-        expect(mockConsole).toHaveBeenCalledWith([], "--DB after delete")
-    })
 })

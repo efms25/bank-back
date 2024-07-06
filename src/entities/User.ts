@@ -15,7 +15,7 @@ export class User {
   @Column({ nullable: false })
   password: string;
 
-  constructor(id_user: string, name: string, email: string, password: string) {
+  constructor(name: string, email: string, password: string) {
     
     this.id_user = randomUUID();
     this.name = name;   

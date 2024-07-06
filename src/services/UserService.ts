@@ -1,51 +1,24 @@
-export interface User {
-    name: string,
-    email: string
-}
-
-const db = [
-    {
-        name: "Jorge",
-        email: "Jorge@mail.com"
-    }
-]
+import { AppDataSource } from "../database"
+import { User } from "../entities/User"
+import { UserRepository } from "../repositories/UserRepository"
 
 
 class UserService {
-    db: User[]
+    private userRepository: UserRepository
 
     constructor(
-        database = db
+        userRepository = new UserRepository(AppDataSource.manager)
     ) {
-        this.db = database
+        this.userRepository = userRepository
     }
 
-    createUser = (name: string, email: string) => {
-        const user = {
-            name,
-            email
-        }
-
-        if(user.name && user.email) {
-            this.db.push(user)
-            console.log(this.db, "--DB atualizado")
-        } else {
-            console.log('Nome e email são obrigatórios')
-        }
+    createUser = (name: string, email: string, password: string) => {
+        const user = new User(name,email,password)
+        return this.userRepository.createUser(user)
     }
 
-    getAllUsers = () => {
-        return db;
-    }
+    getUser = () => {
 
-    deleteUser = (email: string) => {
-        const userIndex = this.db.findIndex(user => user.email === email)
-        if(userIndex === -1) {
-            console.log("Email fornecido não foi encontrado")
-            return false;
-        }
-        this.db.splice(userIndex, 1);
-        console.log(this.db, "--DB after delete")
     }
 }
 

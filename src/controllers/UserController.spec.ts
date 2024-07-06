@@ -3,21 +3,27 @@ import { UserController } from "./UserController"
 import { makeMockResponse } from '../__mocks__/mockResponse.mock'
 import { Request } from 'express'
 
+const mockUserService = {
+    createUser: jest.fn()
+}
+
+jest.mock('../services/UserService', () => {
+    return {
+        UserService: jest.fn().mockImplementation(() => {
+            return mockUserService
+        })
+    }
+})
 
 describe("UserController", () => {
-    const mockUserService: Partial<UserService> = {
-        createUser: jest.fn(),
-        getAllUsers: jest.fn(),
-        deleteUser: jest.fn()
-    }
 
-    const userController = new UserController(mockUserService as UserService)
+    const userController = new UserController()
 
     it("Deve retornar os usuários", () => {
         const mockRequest = {} as Request
         const mockResponse = makeMockResponse()
 
-        const users = userController.getAllUsers(mockRequest,mockResponse);
+        const users = userController.getUsers(mockRequest,mockResponse);
         expect(mockResponse.state.status).toBe(200)
     })
 
@@ -26,6 +32,7 @@ describe("UserController", () => {
             body: {
                 name: "Kodah",
                 email: "kodah@email.com",
+                password: "password"
             }
         } as Request
         const mockResponse = makeMockResponse()
@@ -39,14 +46,15 @@ describe("UserController", () => {
         const mockRequest = {
             body: {
                 name: "",
-                email: "kodah@email.com"
+                email: "kodah@email.com",
+                password: 'password'
             }
         } as Request
 
         const mockResponse = makeMockResponse()
         userController.createUser(mockRequest, mockResponse)
         expect(mockResponse.state.status).toBe(400);
-        expect(mockResponse.state.json).toMatchObject({message: "Bad request: name invalid"})
+        expect(mockResponse.state.json).toMatchObject({message: "Bad request! Todos os campos são obrigatorios"})
     })
 
 
@@ -54,7 +62,8 @@ describe("UserController", () => {
         const mockRequest = {
             body: {
                 name: "kodah",
-                email: ""
+                email: "",
+                password: 'password'
             }
         } as Request
 
@@ -62,6 +71,21 @@ describe("UserController", () => {
         userController.createUser(mockRequest, mockResponse)
         expect(mockResponse.state.status).toBe(400);
         expect(mockResponse.state.json).toMatchObject({message: "Bad request: email invalid"})
+    })
+
+    it("Deve retornar erro caso falte o password", () => {
+        const mockRequest = {
+            body: {
+                name: "kodah",
+                email: "kodah@email.com",
+                password: ""
+            }
+        } as Request
+
+        const mockResponse = makeMockResponse()
+        userController.createUser(mockRequest, mockResponse)
+        expect(mockResponse.state.status).toBe(400);
+        expect(mockResponse.state.json).toMatchObject({message: "Bad request: password invalid"})
     })
 
     it("Deve remover um item do DB", () => {
