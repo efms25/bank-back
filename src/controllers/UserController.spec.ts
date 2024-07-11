@@ -2,9 +2,11 @@ import { UserService } from "../services/UserService"
 import { UserController } from "./UserController"
 import { makeMockResponse } from '../__mocks__/mockResponse.mock'
 import { Request } from 'express'
+import { makeMockRequest } from "../__mocks__/mockRequest.mock"
 
 const mockUserService = {
-    createUser: jest.fn()
+    createUser: jest.fn(),
+    getUser: jest.fn()
 }
 
 jest.mock('../services/UserService', () => {
@@ -57,6 +59,19 @@ describe("UserController", () => {
         expect(mockResponse.state.json).toMatchObject({message: "Bad request! Todos os campos são obrigatorios"})
     })
 
+    it("Deve retornar o usuário com o userId informado", () => {
+        const mockRequest = makeMockRequest({
+            params: {
+                userId: '123456'
+            }
+        })
+        const mockResponse = makeMockResponse()
+
+
+        userController.getUser(mockRequest, mockResponse)
+        expect(mockUserService.getUser).toHaveBeenCalledWith('123456')
+        expect(mockResponse.state.status).toBe(200)
+    })
 
     it("Deve retornar erro caso falte o email", () => {
         const mockRequest = {
